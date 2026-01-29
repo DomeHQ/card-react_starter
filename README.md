@@ -38,6 +38,7 @@ Before getting started, ensure the following tools and access are available on y
 
    * `name`: Your card name
    * `iuid`: Paste the Card ID from **My Cards**
+> Note: The `iuid` is essential for building, identifying, and deploying your card within Dome.
 
 ---
 
@@ -76,6 +77,9 @@ Before deploying, ensure the following:
 
 1. Your repository uses the **reusable GitHub Actions release workflow** (included in the starter).
 2. A deployment token is configured as a GitHub repository secret.
+3. ensure that the card project builds correctly.
+4. Production build output is generated in either `dist/` or `build/` directory (pre-configured in the starter).
+5. The build pipeline completes successfully.
 
 ---
 
@@ -187,54 +191,17 @@ This storage is scoped to your card and managed by Dome.
 
 ---
 
-## Manifest
+## Additional Notes
 
-Each card must include a `manifest-card.json` file in the card root directory.
+### Rendering Model
 
-### Required fields
+Dome cards are client-side rendered only.
 
-| Key    | Description                                              |
-| ------ | -------------------------------------------------------- |
-| `name` | The display name of the card                             |
-| `iuid` | The card’s unique ID, generated when the card is created |
+* Server-side rendering (SSR) is not supported
+* Cards must run entirely in the browser
+* Framework features that rely on SSR (e.g. server data loaders, server components, edge rendering) should not be used
 
-The `iuid` is essential for building, identifying, and deploying your card within Dome.
-
-## Build
-
-Before releasing a card, ensure that it builds correctly.
-
-### Build Requirements
-
-- Production build output must be generated in one of the following directories:
-
-  - `dist/`
-  - `build/`
-- Your build pipeline must complete successfully
-
-### Build Pipeline Behavior
-
-When the build pipeline runs, it will:
-
-1. Move compiled files to:
-
-   ```bash
-   3rdparty/cards/{IUID}/
-   ```
-
-2. Generate a build descriptor file:
-
-   ```bash
-   build_output.{IUID}.{BUILD_TIMESTAMP}.{CARD_NAME}.txt
-   ```
-
-This descriptor can be used to verify or deploy that specific version.
-
----
-
-## Release
-
-Each card repository is required to use a **reusable GitHub Actions workflow** for releases.
+Ensure your card is built and deployed as a purely client-rendered web application.
 
 ### Reusable Workflow
 
@@ -246,23 +213,13 @@ InTouchSO/cards-ci/.github/workflows/card-release.yml
 
 The workflow must be referenced using a **tag**, allowing your card to:
 
-- Pin to a **known-good version**, or
-- Track the **latest stable release**
+* Pin to a **known-good version**, or
+* Track the **latest stable release**
 
-### Example
+#### Example
 
 ```yaml
 uses: InTouchSO/cards-ci/.github/workflows/card-release.yml@stable
 ```
-
-You may replace `stable` with any version tag you want to lock to.
-
-### Release Behavior
-
-When you push to the `release` branch:
-
-- The reusable workflow builds the card
-- A new release is created for that card
-- Build artifacts are packaged according to the card pipeline rules
 
 ---
