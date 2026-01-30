@@ -20,13 +20,13 @@ Before getting started, ensure the following tools and access are available on y
 
 ### 1. Create Your Card in Dome
 
-1. Go to [https://dome.so/developer](https://dome.so/developer) and join the **Dome Developer** Dome.
-2. Open **My Cards** and click **Add Card**.
+1. Go to [https://dome.so/developer](https://dome.so/developer) and join the **Dome Developer** dome (mini-app).
+2. Open the **Cards** tab and click **Add Card**.
 3. After creating your card you should see it listed with the following details:
 
-   * Card name
-   * Card ID (IUID)
-   * Available card versions
+   - Card name
+   - Card ID (IUID)
+   - Available card versions
 
 ---
 
@@ -36,8 +36,9 @@ Before getting started, ensure the following tools and access are available on y
 2. Open `manifest-card.json` in the project root.
 3. Update the following fields:
 
-   * `name`: Your card name
-   * `iuid`: Paste the Card ID from **My Cards**
+   - `name`: Your card name
+   - `iuid`: Paste the Card ID from **Cards** tab
+
 > Note: The `iuid` is essential for building, identifying, and deploying your card within Dome.
 
 ---
@@ -49,7 +50,7 @@ It handles initialization, authentication, permissions, events, and communicatio
 
 The starter project already includes SDK initialization logic. You only need to provide the decryption key.
 
-1. In **My Cards**, open your card and click **Show Decryption Key**.
+1. In **Cards** tab, open your card and click **Show Decryption Key**.
 2. Copy the decryption blob (JSON).
 3. Paste the blob into the reactStarterDecBlob constant in the starter code.
 
@@ -85,15 +86,15 @@ Before deploying, ensure the following:
 
 ### Add the Deployment Token
 
-1. In **My Cards**, open your card and click **Get Deployment Token**.
+1. In **Cards** tab, open your card and click **Get Deployment Token**.
 2. Copy the generated token.
 3. In your GitHub repository:
 
-   * Go to **Settings** → **Secrets and variables** → **Actions**
-   * Add a new **Repository Secret**
+   - Go to **Settings** → **Secrets and variables** → **Actions**
+   - Add a new **Repository Secret**
 
-     * **Key**: `WEBAPP_DEPLOY_TOKEN`
-     * **Value**: Your deployment token
+     - **Key**: `WEBAPP_DEPLOY_TOKEN`
+     - **Value**: Your deployment token
 
 ---
 
@@ -101,7 +102,7 @@ Before deploying, ensure the following:
 
 1. By default, deployments trigger on pushes to the `release` branch.
 
-   * You can change this in `.github/workflows/release-build.yml`.
+   - You can change this in `.github/workflows/release-build.yml`.
 2. Push your changes to the `release` branch.
 3. Once the workflow completes successfully, your card will be live in Dome.
 
@@ -119,8 +120,8 @@ You can test your card locally inside Dome without redeploying it after every ch
 4. Open **Settings** → **Developer** section.
 5. Set:
 
-   * **Environment**: `Local`
-   * **Local URL**: The localhost URL (including port) where your card is running
+   - **Environment**: `Local`
+   - **Local URL**: The localhost URL (including port) where your card is running
 6. Click **Apply**.
 
 Your locally running card should now render inside the Dome.
@@ -134,20 +135,20 @@ After initialization, the SDK allows your card to communicate with Dome.
 
 ### Event Handling
 
-* The `CardEventHandler` passed into `CardSdk.init` is required.
-* Key callbacks:
+- The `CardEventHandler` passed into `CardSdk.init` is required.
+- Key callbacks:
 
-  * `onInit`: Fired when initialization completes successfully.
+  - `onInit`: Fired when initialization completes successfully.
     Provides:
 
-    * User details
-    * Card metadata
-    * Dome context
-    * Host information
-    * User permissions
-    * UI preferences
-  * `onInitError`: Fired if SDK initialization fails
-  * `onError`: General error reporting
+    - User details
+    - Card metadata
+    - Dome context
+    - Host information
+    - User permissions
+    - UI preferences
+  - `onInitError`: Fired if SDK initialization fails
+  - `onError`: General error reporting
 
 Use `onInit` as the main entry point for your card logic.
 
@@ -155,8 +156,8 @@ Use `onInit` as the main entry point for your card logic.
 
 ### SDK Instance Access
 
-* `CardSdk.init` returns a promise that resolves to the SDK instance.
-* Store this instance to access SDK methods throughout your card.
+- `CardSdk.init` returns a promise that resolves to the SDK instance.
+- Store this instance to access SDK methods throughout your card.
 
 ---
 
@@ -164,8 +165,8 @@ Use `onInit` as the main entry point for your card logic.
 
 You can control behavior based on user permissions:
 
-* `sdk.canRead()` / `sdk.canWrite()` — simple permission checks
-* `sdk.hasPerms(CardPermission.X)` — fine-grained permission checks using enums
+- `sdk.canRead()` / `sdk.canWrite()` — simple permission checks
+- `sdk.hasPerms(CardPermission.X)` — fine-grained permission checks using enums
 
 ---
 
@@ -173,10 +174,10 @@ You can control behavior based on user permissions:
 
 The SDK provides a built-in file system API via `CardFS`, allowing you to:
 
-* Read files
-* Create files
-* Delete files
-* List files
+- Read files
+- Create files
+- Delete files
+- List files
 
 This storage is scoped to your card and managed by Dome.
 
@@ -184,10 +185,10 @@ This storage is scoped to your card and managed by Dome.
 
 ## Next Steps
 
-* Explore advanced SDK APIs
-* Add permission-aware UI
-* Implement persistent storage with `CardFS`
-* Prepare your card for public release
+- Explore advanced SDK APIs
+- Add permission-aware UI
+- Implement persistent storage with `CardFS`
+- Prepare your card for public release
 
 ---
 
@@ -197,9 +198,9 @@ This storage is scoped to your card and managed by Dome.
 
 Dome cards are client-side rendered only.
 
-* Server-side rendering (SSR) is not supported
-* Cards must run entirely in the browser
-* Framework features that rely on SSR (e.g. server data loaders, server components, edge rendering) should not be used
+- Server-side rendering (SSR) is not supported
+- Cards must run entirely in the browser
+- Framework features that rely on SSR (e.g. server data loaders, server components, edge rendering) should not be used
 
 Ensure your card is built and deployed as a purely client-rendered web application.
 
@@ -213,8 +214,8 @@ InTouchSO/cards-ci/.github/workflows/card-release.yml
 
 The workflow must be referenced using a **tag**, allowing your card to:
 
-* Pin to a **known-good version**, or
-* Track the **latest stable release**
+- Pin to a **known-good version**, or
+- Track the **latest stable release**
 
 #### Example
 

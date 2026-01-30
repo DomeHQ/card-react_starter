@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react'
-import { CardSdk, getKeyFromBlob, type CardEventHandler } from 'dome-embedded-app-sdk';
+import { CardSdk, getKeyFromBlob, type CardEventHandler, type CardInitData, type CardInitErrorPayload, type CardUser } from 'dome-embedded-app-sdk';
 import './App.css'
 
 function App() {
    // User object state
-   const [user, setUser] = useState<any>(null);
+   const [user, setUser] = useState<CardUser | null>(null);
+   const [uiPref, setUiPref] = useState<CardUser | null>(null);
    // store the SDK state to access it later
-   const [sdk, setSdk] = useState<any>(null);
-   const [initError, setInitError] = useState<any>(null);
+   const [sdk, setSdk] = useState<CardSdk | null>(null);
+   const [initError, setInitError] = useState<CardInitErrorPayload | null>(null);
 
    useEffect(() => {
      // decryption blob for the card shared with devs goes here
@@ -16,8 +17,15 @@ function App() {
      // Handle dome card events
      const eventHandler: CardEventHandler = {
       // here you will recieve the init data with user info, theme, permissions etc.
-       onInit: (data: any) => {
-         setUser(data?.user);
+       onInit: (data: CardInitData) => {
+        const { user, ui } = data;
+
+         user && setUser(user);
+
+         if (ui && ui?.theme) {
+          setUiPref(ui);
+          document.documentElement.setAttribute('data-theme', ui.theme);
+         }
        },
        // onInitError will return an error object with message and error_code if initialization failsx
        onInitError: (data: any) => {
@@ -44,7 +52,7 @@ function App() {
        {user ? (
          <>
            <h1>
-             Hello, {user.name?.given} {user.name?.family}
+             Hello, { user.getFullName?.() }
            </h1>
            <p>Congratulations! Your card is running. 🎉</p>
          </>
