@@ -27,7 +27,7 @@ function App() {
           document.documentElement.setAttribute('data-theme', ui.theme);
          }
        },
-       // onInitError will return an error object with message and error_code if initialization failsx
+       // onInitError will return an error object with message and error_code if initialization fails
        onInitError: (data: any) => {
         setInitError(data);
        },
