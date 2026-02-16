@@ -12,7 +12,7 @@ Use this skill to help implement features with the Dome Card SDK in card project
 - **Initialization**: Connects a card to the Dome host environment.
 - **Context**: Provides viewer identity, roles, permissions, and UI preferences.
 - **User helpers**: `user.getFullName()` returns the user’s full name string when available.
-- **CardFS API**: Create, read, update, delete, and list files that belong to the card.
+- **CardFS API**: `cardFS` is a high-level API for reading, writing, deleting, and listing files. Each method either returns a promise or uses handlers for streaming updates.
 - **Events**: Subscribe to host updates (e.g., init payload, errors).
 - **Deep links**: Trigger `dome://` or `intouchapp://` deep links.
 - **Host info**: `sdk.getHost()` returns `{ type, os, os_ver, app_type, app_ver, capabilities }` when available.
@@ -35,6 +35,46 @@ Keep this flow so the SDK is initialized only once and context stays in app stat
 - **Permissions**: Use `sdk.hasPerm(...)`, `sdk.canRead()`, and `sdk.canWrite()` with `CardPermission` to gate UI.
 - **CardFS**: Use `sdk.cardFS.read`, `readById`, `write`, `writeById`, `delete`, `deleteById`, and `list`.
 - **Deep links**: Call `sdk.openDeepLink("dome://...")` when you need to open Dome routes.
+
+## IContact (User Context) Shape
+
+`onInit` user information is an `IContact` object with this shape:
+
+```json
+{
+  "name": {
+    "family": "string",
+    "given": "string"
+  },
+  "photo": {
+    "url": "string"
+  },
+  "organization": {
+    "company": "string",
+    "department": "string",
+    "position": "string"
+  },
+  "about_me": "string | null",
+  "cover": {
+    "photo": {
+      "url": "string"
+    },
+    "color": "string"
+  },
+  "iid": "string",
+  "mci": "string",
+  "user_iuid": "string",
+  "iuid": "string",
+  "type": "person | string",
+  "label": "string",
+  "valid": "boolean",
+  "can_delete": "boolean",
+  "read_only": "boolean",
+  "share_url": "string"
+}
+```
+
+This is a structural reference, not a fixed payload. Treat fields as optional in UI rendering and fall back gracefully when a field is missing.
 
 ## Example Snippets
 
@@ -127,6 +167,62 @@ const readHandler: CardFsReadHandler = {
   },
 };
 ```
+
+### `cardFS.read` object metadata shape
+
+`readHandler.next` includes `object` metadata for the file/document. The payload commonly follows this shape:
+
+```json
+{
+  "did": "string",
+  "iuid": "string",
+  "type": "document | string",
+  "name": "string",
+  "version": "number",
+  "attached_to": "string",
+  "parent": "string",
+  "time_create": "number",
+  "time_content_mod": "number",
+  "time_last_mod": "number",
+  "summary_text": "string",
+  "mimetype": "string",
+  "is_live": "boolean",
+  "size": "number",
+  "data_hash": "string",
+  "permissions": {
+    "can_write": "boolean",
+    "can_share": "boolean"
+  },
+  "perms": ["string"],
+  "perms_v2": {
+    "u": "string",
+    "a": "string",
+    "m": "string",
+    "p": "string"
+  },
+  "share_url": "string",
+  "owner": "object | null",
+  "orig": {
+    "url": "string",
+    "size": "number"
+  },
+  "hd": {
+    "url": "string",
+    "size": "number"
+  },
+  "th": {
+    "url": "string",
+    "size": "number"
+  },
+  "url": {
+    "original": "string",
+    "thumbnail": "string",
+    "hd": "string"
+  }
+}
+```
+
+Treat `orig`, `hd`, `th`, `url`, `owner`, and permission-related fields as optional; check presence before use.
 
 ### List handler lifecycle example
 
