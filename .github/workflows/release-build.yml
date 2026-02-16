@@ -7,6 +7,6 @@ on:
 
 jobs:
   deploy:
-    uses: InTouchSO/cards-ci/.github/workflows/card-release.yml@stable
+    uses: DomeHQ/cards-ci/.github/workflows/card-release.yml@stable
     secrets:
       WEBAPP_DEPLOY_TOKEN: ${{ secrets.WEBAPP_DEPLOY_TOKEN }}

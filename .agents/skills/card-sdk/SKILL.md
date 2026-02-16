@@ -4,39 +4,54 @@ description: Use when working on Dome card projects that initialize and use dome
 ---
 
 # Card SDK Skills Guide
+Use this skill to help implement features with the Dome Card SDK in card projects. It summarizes the SDK’s core capabilities, common initialization patterns, and recommended usage. In this document we use "user" to refer to the user who is logged into Dome app and viewiing the dome.
 
-Use this skill to help implement features with the Dome Card SDK in card projects. It summarizes the SDK’s core capabilities, common initialization patterns, and recommended usage.
+## What is a dome
+A dome is a mini-app that runs inside the Dome app. Each dome is a container that can have one or more cards.
+
+## What is a card
+Each card is a section within a dome that provides a single visual functionality to the user - similar to a single page webapp. A card can be added to more than one dome. Each instance of the card has it's own life (_think of each implemention of a card as the Class and each instance added to a dome as its Object_). A card cannot be used on it's own. It has to be added to a dome. Think of a card as a widget or a ViewController (in iOS) or a Fragment (on Android).
 
 ## What the Card SDK Provides
+The Card SDK enables a developer to build their own card using modern web technologies. This can be used to build any functionality. Once the card is added to a dome, the dome gets the functionality automatically. 
 
 - **Initialization**: Connects a card to the Dome host environment.
-- **Context**: Provides viewer identity, roles, permissions, and UI preferences.
-- **User helpers**: `user.getFullName()` returns the user’s full name string when available.
-- **CardFS API**: `cardFS` is a high-level API for reading, writing, deleting, and listing files. Each method either returns a promise or uses handlers for streaming updates.
+- **Context**: Provides viewing user's identity, their role, permissions, and UI preferences.
 - **Events**: Subscribe to host updates (e.g., init payload, errors).
-- **Deep links**: Trigger `dome://` or `intouchapp://` deep links.
+- **Deep links**: Trigger `dome://` deep links to open functionality of the container dome or the Dome app.
 - **Host info**: `sdk.getHost()` returns `{ type, os, os_ver, app_type, app_ver, capabilities }` when available.
 
-## Common Initialization Pattern
+## The Logged in "user"
+The logged in user is automatically provided to the card. Because of this, a card never needs to ask for login. The user object is passed in onInit to the card.
 
+## Common Initialization Pattern
 Typical card initialization follows this flow:
 
 - Build a `CardEventHandler` with `onInit`, `onInitError`, and `onError`.
 - Treat `onInit` as the required starting point; it delivers the runtime context needed to use the SDK.
 - Call `CardSdk.init(getKeyFromBlob(blob), handler)`.
-- After `onInit`, use `sdk.cardFS` to read existing data or write new data.
 - Persist `sdk`, `user`, and `ui` in a way that fits your app (state, service, or dependency injection).
 - On `ui.theme`, forward the theme to your UI system (for example, update a data attribute, theme provider, or CSS variables).
 
 Keep this flow so the SDK is initialized only once and context stays in app state.
 
+## What is CardFS
+CardFS is a cloud filesystem made available to each card. The filesystem is per card per dome. If the same card is added to two distinct domes, they will each have their own filesystem. Use CardFS to read and write files. The filesystem is visible and accessible to all members of the dome. Write permission depends on the admin (if members are allowed to write in the card or not). File can be accessed simply by their name just like in a unix environment: e.g. `test/first.json`. The path cannot start with a `/`.
+
+CardFS also allows private per-user filesystem area. This is only accessible to the logged in user. One user cannot see the files stored by another user (unless they are admins or owners). To create a file in user's private area, use the `~` prefix. For example: `~/my_settings.json` will be different for each logged in user.
+
+- **Caching**: The files are automatically cached and made available offline whenever possible. 
+- **CardFS API**: The SDK provides API under `cardFs` for reading, writing, deleting, and listing files. Each method either returns a promise or uses handlers for streaming updates.
+- You can use cardFS API after `onInit` to read existing data or write new data.
+
+
 ## Key SDK APIs
 
-- **Permissions**: Use `sdk.hasPerm(...)`, `sdk.canRead()`, and `sdk.canWrite()` with `CardPermission` to gate UI.
-- **CardFS**: Use `sdk.cardFS.read`, `readById`, `write`, `writeById`, `delete`, `deleteById`, and `list`.
+- **Permissions**: To get the permissions se `sdk.hasPerm(...)`, `sdk.canRead()`, and `sdk.canWrite()` with `CardPermission` to gate UI.
+- **CardFS**: Use `sdk.cardFS.read`, `write`, `delete`, and `list`.
 - **Deep links**: Call `sdk.openDeepLink("dome://...")` when you need to open Dome routes.
 
-## IContact (User Context) Shape
+## User information in IContact 
 
 `onInit` user information is an `IContact` object with this shape:
 
@@ -46,8 +61,10 @@ Keep this flow so the SDK is initialized only once and context stays in app stat
     "family": "string",
     "given": "string"
   },
-  "photo": {
-    "url": "string"
+  "avatar": {
+    "photo": {
+      "url": "string"
+    },
   },
   "organization": {
     "company": "string",
@@ -62,19 +79,14 @@ Keep this flow so the SDK is initialized only once and context stays in app stat
     "color": "string"
   },
   "iid": "string",
-  "mci": "string",
   "user_iuid": "string",
-  "iuid": "string",
   "type": "person | string",
-  "label": "string",
-  "valid": "boolean",
-  "can_delete": "boolean",
-  "read_only": "boolean",
-  "share_url": "string"
 }
 ```
 
 This is a structural reference, not a fixed payload. Treat fields as optional in UI rendering and fall back gracefully when a field is missing.
+
+- **User helpers**: `user.getFullName()` returns the user’s full name string when available.
 
 ## Example Snippets
 
@@ -174,7 +186,6 @@ const readHandler: CardFsReadHandler = {
 
 ```json
 {
-  "did": "string",
   "iuid": "string",
   "type": "document | string",
   "name": "string",
@@ -189,11 +200,6 @@ const readHandler: CardFsReadHandler = {
   "is_live": "boolean",
   "size": "number",
   "data_hash": "string",
-  "permissions": {
-    "can_write": "boolean",
-    "can_share": "boolean"
-  },
-  "perms": ["string"],
   "perms_v2": {
     "u": "string",
     "a": "string",
@@ -214,15 +220,10 @@ const readHandler: CardFsReadHandler = {
     "url": "string",
     "size": "number"
   },
-  "url": {
-    "original": "string",
-    "thumbnail": "string",
-    "hd": "string"
-  }
 }
 ```
 
-Treat `orig`, `hd`, `th`, `url`, `owner`, and permission-related fields as optional; check presence before use.
+Treat `orig`, `hd`, `th`, `owner`, and permission-related fields as optional; check presence before use.
 
 ### List handler lifecycle example
 
@@ -269,7 +270,7 @@ sdk.cardFS.list('/', listHandler);
 - `cardFS.write` resolves with the updated `object` metadata (and `data` in some contexts).
 - `cardFS.write` update payloads may include `status`, `progress`, and `uploaded_bytes`.
 - `CardFsFileType` supports `TEXT`, `JSON`, and `BINARY`.
-- `cardFS.delete`/`deleteById` return promises; use for removal flows and refresh lists afterward.
+- `cardFS.delete` return promises; use for removal flows and refresh lists afterward.
 - `cardFS.delete` resolves with `{ name, iuid, deleted }` when possible.
 - `CardFsErrorPayload` includes a `message` and optional `code` (`NO_INTERNET`, `NO_PERMISSION`, `NOT_FOUND`, `SERVER_ERROR`, `TIMEOUT`, `INVALID_REQUEST`, `UNKNOWN`).
 - Prefer wrapping CardFS calls in a small hook or service for reuse.
