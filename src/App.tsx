@@ -1,18 +1,30 @@
 import { useEffect, useState } from 'react'
-import { CardSdk, getKeyFromBlob, type CardEventHandler, type CardInitData, type CardInitErrorPayload, type CardUser } from 'dome-embedded-app-sdk';
+import { CardSdk, getKeyFromBlob, type CardEventHandler, type CardInitData, type CardInitErrorPayload, type CardKeyBlobV1, type CardUser } from 'dome-embedded-app-sdk';
+
 import './App.css'
 
 function App() {
    // User object state
    const [user, setUser] = useState<CardUser | null>(null);
-   const [uiPref, setUiPref] = useState<CardUser | null>(null);
+   const [uiPref, setUiPref] = useState<any>(null);
    // store the SDK state to access it later
    const [sdk, setSdk] = useState<CardSdk | null>(null);
    const [initError, setInitError] = useState<CardInitErrorPayload | null>(null);
 
    useEffect(() => {
-     // decryption blob for the card shared with devs goes here
-     const reactStarterDecBlob = {v: 0, seed: 0, obf: []};
+     const decBlob = import.meta.env.VITE_CARD_DEC_BLOB;
+     if (!decBlob) {
+      setInitError({ message: 'Missing VITE_CARD_DEC_BLOB env variable', error_code: 'MISSING_CARD_DEC_BLOB' });
+      return;
+     }
+
+     let reactStarterDecBlob: CardKeyBlobV1;
+     try {
+      reactStarterDecBlob = JSON.parse(decBlob) as CardKeyBlobV1;
+     } catch (_err) {
+      setInitError({ message: 'Invalid VITE_CARD_DEC_BLOB JSON', error_code: 'INVALID_CARD_DEC_BLOB' });
+      return;
+     }
 
      // Handle dome card events
      const eventHandler: CardEventHandler = {
@@ -59,7 +71,7 @@ function App() {
        ) : initError ? (
         <>
          <h3>Initialization Failed</h3>
-         <p>{initError.message} {initError.error_code}</p>
+         <p>{initError.message} ({initError.error_code})</p>
         </>
        ) : (
           <p>Loading...</p>

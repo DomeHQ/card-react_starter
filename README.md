@@ -66,7 +66,9 @@ The starter project already includes SDK initialization logic. You only need to 
 
 1. In **Cards** tab, open your card and click **Show Decryption Key**.
 2. Copy the decryption blob (JSON).
-3. Paste the blob into the reactStarterDecBlob constant in the starter code.
+3. Add it as an env variable for local development:
+   - Create `.env.local` in repo root
+   - Add: `VITE_CARD_DEC_BLOB={"v":0,"seed":0,"obf":[]}`
 
 Once this is complete, the SDK is fully initialized and ready for use.
 
@@ -89,8 +91,14 @@ To deploy the first version, you need to setup the deployment token:
      - **Key**: `WEBAPP_DEPLOY_TOKEN`
      - **Value**: Your deployment token
 
-4. Push your code to the `release` branch.
-5. Wait for the workflow to complete successfully.
+4. Add one more repository secret for the decryption blob:
+
+   - **Key**: `CARD_DEC_BLOB`
+   - **Value**: Your decryption blob JSON
+
+5. Ensure your reusable build workflow maps this secret to `VITE_CARD_DEC_BLOB` for the build step.
+6. Push your code to the `release` branch.
+7. Wait for the workflow to complete successfully.
 
 Now your card is ready to be used in any dome (_mini-app_)!
 

@@ -8,12 +8,22 @@
   --app-text: #ABB5BD;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   background: var(--app-bg);
   color: var(--app-text);
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  width: 100%;
 }

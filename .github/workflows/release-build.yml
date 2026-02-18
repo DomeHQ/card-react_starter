@@ -10,3 +10,4 @@ jobs:
     uses: DomeHQ/cards-ci/.github/workflows/card-release.yml@stable
     secrets:
       WEBAPP_DEPLOY_TOKEN: ${{ secrets.WEBAPP_DEPLOY_TOKEN }}
+      CARD_DEC_BLOB: ${{ secrets.CARD_DEC_BLOB }}
