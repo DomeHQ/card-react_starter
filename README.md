@@ -88,16 +88,17 @@ To deploy the first version, you need to setup the deployment token:
    - Add a new **Repository Secret**
 
      - **Key**: `WEBAPP_DEPLOY_TOKEN`
-     - **Value**: Your deployment token
+     - **Value**: Paste your deployment token
 
-4. Add one more repository secret for the decryption blob:
+4. In **Cards** tab, open your card and click **Show decryption key**.
+5. Copy the Blob JSON
+6. Add one more repository secret for the decryption blob:
 
    - **Key**: `CARD_DEC_BLOB`
-   - **Value**: Your decryption blob JSON
+   - **Value**: Paste the copied blob JSON
 
-5. Ensure your reusable build workflow maps this secret to `VITE_CARD_DEC_BLOB` for the build step.
-6. Push your code to the `release` branch.
-7. Wait for the workflow to complete successfully.
+7. Push your code to the `release` branch.
+8. Wait for the workflow to complete successfully. You should get notification from "Dome Dev Bot" once deployment is ready.
 
 Now your card is ready to be used in any dome (_mini-app_)!
 
